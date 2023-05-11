@@ -1,0 +1,21 @@
+{
+  "name": "arduino-clock-scramble",
+  "version": "1.0.0",
+  "description": "weeeeee",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ."
+  },
+  "keywords": [
+    "rah"
+  ],
+  "author": "IceCreamSandwch",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "fs": "^0.0.1-security",
+    "jimp": "^0.22.8",
+    "screenshot-desktop": "^0.0.0-development",
+    "tesseract.js": "^4.0.5"
+  }
+}
