@@ -2,6 +2,7 @@ const screenshot = require('screenshot-desktop');
 const fs = require('fs');
 const { createWorker } = require('tesseract.js');
 const Jimp = require('jimp');
+const { Board, SerialPort } = require('johnny-five');
 
 // Constants
 const SCREENSHOT_PATH = 'C:\\Users\\razor\\Documents\\GitHub\\arduino clock scramble\\screenshot.jpg';
@@ -15,14 +16,14 @@ async function giveDisplays() {
   const displayIds = displays.map(display => `'${display.id}'`);
   console.log(`Available displays: ${displayIds.join(' and ')}\n`);
 }
-var last = ''
+var last = '';
+
 // Take a screenshot and process it
-async function takeScreenshot(displayId, outputPath) {
+async function takeScreenshot(displayId, outputPath, board) {
   try {
-    
+
     // Take the screenshot
     const imgPath = await screenshot({ filename: outputPath, format: SCREENSHOT_FORMAT, screen: displayId });
-    // console.log(`Screenshot saved to ${imgPath}`);
 
     // Load the screenshot using Jimp
     const image = await Jimp.read(SCREENSHOT_PATH);
@@ -50,12 +51,14 @@ async function takeScreenshot(displayId, outputPath) {
 
     // Recognize the text in the cropped image
     const { data: { text } } = await worker.recognize(buffer);
-    let scram = text.replace(/T/g, "1").replace(/O/g, "0").replace(/l/g, "1".replace(/S/g, "5").replace(/(.)\1+/g, '$1').replace(/11/g, '1').replace(/S5/g, '5'))
-    if(scram != last){
+    let scram = text.replace(/T/g, "1").replace(/O/g, "0").replace(/l/g, "1").replace(/S/g, "5").replace(/(.)\1+/g, '$1').replace(/11/g, '1').replace(/S5/g, '5');
+
+    if (scram !== last) {
       console.log(scram);
       last = scram;
-    } else {
 
+      // Send the message to Arduino
+      board.serial.write(scram + '1');
     }
 
     await worker.terminate();
@@ -67,7 +70,15 @@ async function takeScreenshot(displayId, outputPath) {
 // Start the program
 async function start() {
   await giveDisplays();
-  setInterval(() => takeScreenshot(SCREENSHOT_DISPLAY_ID, SCREENSHOT_PATH), SCREENSHOT_INTERVAL_MS);
+
+  // Set up Arduino board
+  const board = new Board({
+    port: new SerialPort('COM3', { baudRate: 9600 }) // Replace 'COM3' with the correct serial port of your Arduino Uno
+  });
+
+  board.on('ready', () => {
+    setInterval(() => takeScreenshot(SCREENSHOT_DISPLAY_ID, SCREENSHOT_PATH, board), SCREENSHOT_INTERVAL_MS);
+  });
 }
 
 start();
