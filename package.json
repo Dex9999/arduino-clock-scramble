@@ -15,7 +15,9 @@
     "canvas": "^2.11.2",
     "fs": "^0.0.1-security",
     "jimp": "^0.22.8",
+    "johnny-five": "^2.1.0",
     "screenshot-desktop": "^0.0.0-development",
+    "serialport": "^11.0.0",
     "tesseract.js": "^4.0.5"
   }
 }
